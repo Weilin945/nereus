@@ -105,14 +105,14 @@ export default function MarketChart({ data, className = "" }: MarketChartProps) 
 
     return (
         <div className={`card-surface ${className}`} ref={containerRef}>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-                <h3 className="text-white text-lg font-semibold">Market Prediction</h3>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-5 p-5 pb-0">
+                <h3 className="text-white text-lg font-bold tracking-tight">Market Prediction</h3>
                 <div className="flex flex-wrap gap-2">
                     {(["1H","6H","1D","1W","1M","ALL"] as Timeframe[]).map(tfBtn)}
                 </div>
             </div>
 
-            <div className="relative w-full h-64 select-none">
+            <div className="relative w-full h-64 select-none px-2">
                 <svg
                     viewBox={`0 0 ${width} ${height}`}
                     className="absolute inset-0 w-full h-full"
@@ -124,24 +124,36 @@ export default function MarketChart({ data, className = "" }: MarketChartProps) 
                         const y = padT + (1 - v/100) * H;
                         return (
                             <g key={v}>
-                                <line x1={padL} y1={y} x2={width-padR} y2={y} stroke="#1f2937" strokeOpacity={0.5} />
-                                <text x={8} y={y+4} fontSize={10} fill="#9CA3AF">{v}%</text>
+                                <line x1={padL} y1={y} x2={width-padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeOpacity={0.8} />
+                                <text x={8} y={y+4} fontSize={11} fill="var(--foreground-tertiary)" fontWeight={500}>{v}%</text>
                             </g>
                         );
                     })}
 
-                    {/* Lines */}
-                    <polyline fill="none" stroke={"var(--neon-cyan)"} strokeWidth={2.5} points={pointsYes} style={{ filter: "drop-shadow(0 0 6px rgba(0,245,255,0.6))" }} />
-                    <polyline fill="none" stroke={"var(--neon-magenta)"} strokeWidth={2.5} points={pointsNo} style={{ filter: "drop-shadow(0 0 6px rgba(255,31,143,0.5))" }} />
+                    {/* Lines - More subtle, professional look */}
+                    <polyline 
+                        fill="none" 
+                        stroke="var(--primary-light)" 
+                        strokeWidth={2.5} 
+                        points={pointsYes} 
+                        style={{ filter: "drop-shadow(0 0 4px rgba(99,102,241,0.3))" }} 
+                    />
+                    <polyline 
+                        fill="none" 
+                        stroke="var(--danger)" 
+                        strokeWidth={2.5} 
+                        points={pointsNo} 
+                        style={{ filter: "drop-shadow(0 0 4px rgba(239,68,68,0.3))" }} 
+                    />
 
                     {/* Hover marker */}
                     {hover && hoverX != null && (
                         <g>
-                            <line x1={hoverX} y1={padT} x2={hoverX} y2={height-padB} stroke="#94A3B8" strokeDasharray="4 4" opacity={0.7} />
+                            <line x1={hoverX} y1={padT} x2={hoverX} y2={height-padB} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 4" opacity={0.8} />
                             {/* yes circle */}
-                            <circle cx={hoverX} cy={padT + (1 - hover.yes/100)*H} r={4} fill="var(--neon-cyan)" />
+                            <circle cx={hoverX} cy={padT + (1 - hover.yes/100)*H} r={5} fill="var(--primary-light)" stroke="white" strokeWidth={1.5} />
                             {/* no circle */}
-                            <circle cx={hoverX} cy={padT + (1 - hover.no/100)*H} r={4} fill="var(--neon-magenta)" />
+                            <circle cx={hoverX} cy={padT + (1 - hover.no/100)*H} r={5} fill="var(--danger)" stroke="white" strokeWidth={1.5} />
                         </g>
                     )}
                 </svg>
@@ -149,15 +161,15 @@ export default function MarketChart({ data, className = "" }: MarketChartProps) 
                 {/* Tooltip */}
                 {hover && hoverX != null && (
                     <div
-                        className="absolute -translate-x-1/2 top-2 bg-[rgba(10,14,20,0.88)] border border-border rounded-md px-2 py-1 text-xs text-white shadow"
+                        className="absolute -translate-x-1/2 top-2 bg-[var(--background-elevated)] border border-[var(--border-medium)] rounded-lg px-3 py-2 text-xs text-white shadow-[var(--elevation-3)] backdrop-blur-xl"
                         style={{ left: `${(hoverX/width)*100}%` }}
                     >
                         <div className="flex items-center gap-2">
-                              <span className="text-foreground-dim">{hover.timestamp ? new Date(hover.timestamp).toLocaleTimeString() : ''}</span>
+                            <span className="text-[var(--foreground-secondary)] font-medium">{hover.timestamp ? new Date(hover.timestamp).toLocaleTimeString() : ''}</span>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="neon-text-cyan font-semibold">Yes {hover.yes.toFixed(1)}%</span>
-                            <span className="neon-text-magenta font-semibold">No {hover.no.toFixed(1)}%</span>
+                        <div className="flex items-center gap-3 mt-1.5">
+                            <span className="text-[var(--primary-light)] font-semibold">Yes {hover.yes.toFixed(1)}%</span>
+                            <span className="text-[var(--danger-light)] font-semibold">No {hover.no.toFixed(1)}%</span>
                         </div>
                     </div>
                 )}

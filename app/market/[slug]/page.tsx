@@ -305,23 +305,23 @@ export default function MarketDetailPage() {
         <div className="min-h-screen">
             <Navbar />
             
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+                <div className="mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
                         <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-xl shrink-0">
+                            <div className="w-14 h-14 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-[var(--elevation-2)]">
                                 {getCategoryIcon(marketData.category)}
                             </div>
-                            <h1 className="text-white text-xl sm:text-2xl font-bold">{marketData.title}</h1>
+                            <h1 className="text-white text-2xl sm:text-3xl font-bold tracking-tight">{marketData.title}</h1>
                         </div>
                         <div className="flex items-center space-x-2 sm:ml-auto">
-                            <button className="text-gray-400 hover:text-white p-2 rounded transition-colors">
+                            <button className="text-[var(--foreground-secondary)] hover:text-[var(--foreground)] p-2.5 rounded-lg transition-all hover:bg-[rgba(255,255,255,0.06)]">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                 </svg>
                             </button>
-                            <button className="text-gray-400 hover:text-white p-2 rounded transition-colors">
+                            <button className="text-[var(--foreground-secondary)] hover:text-[var(--foreground)] p-2.5 rounded-lg transition-all hover:bg-[rgba(255,255,255,0.06)]">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                 </svg>
@@ -330,29 +330,29 @@ export default function MarketDetailPage() {
                     </div>
                     
                     {marketData.description && (
-                        <p className="text-gray-400 mb-4 text-sm sm:text-base">{marketData.description}</p>
+                        <p className="text-[var(--foreground-secondary)] mb-5 text-sm sm:text-base leading-relaxed">{marketData.description}</p>
                     )}
                     
                     {/* Prediction indicators */}
-                    <div className="flex flex-wrap gap-2 sm:gap-6 text-sm mb-4">
+                    <div className="flex flex-wrap gap-3 sm:gap-6 text-sm mb-5">
                         {marketData.outcomes.map((outcome, index) => (
-                            <div key={outcome.id} className="flex items-center space-x-2 mb-2">
-                                <div className={`w-3 h-3 rounded-full shrink-0 ${
-                                    index === 0 ? 'bg-green-500' : 
-                                    index === 1 ? 'bg-red-500' :
-                                    index === 2 ? 'bg-blue-500' : 'bg-yellow-500'
+                            <div key={outcome.id} className="flex items-center space-x-2.5 mb-2">
+                                <div className={`w-3 h-3 rounded-full shrink-0 shadow-lg ${
+                                    index === 0 ? 'bg-[var(--success)]' : 
+                                    index === 1 ? 'bg-[var(--danger)]' :
+                                    index === 2 ? 'bg-[var(--primary)]' : 'bg-[var(--warning)]'
                                 }`}></div>
-                                <span className="text-gray-400 whitespace-nowrap">{outcome.outcome} {outcome.percentage}%</span>
+                                <span className="text-[var(--foreground-secondary)] whitespace-nowrap font-medium">{outcome.outcome} <span className="text-white font-semibold">{outcome.percentage}%</span></span>
                             </div>
                         ))}
                     </div>
 
                     {/* Market info */}
-                    <div className="grid grid-cols-2 sm:flex sm:space-x-6 gap-2 text-sm text-gray-400">
-                        <span className="truncate">Vol: ${marketData.totalVolume.toLocaleString()}</span>
-                        <span className="truncate">Liq: ${marketData.totalLiquidity.toLocaleString()}</span>
-                        <span className="truncate">Cat: {marketData.category}</span>
-                        <span className="truncate">Ends: {new Date(marketData.endDate).toLocaleDateString()}</span>
+                    <div className="grid grid-cols-2 sm:flex sm:space-x-6 gap-3 text-sm text-[var(--foreground-secondary)]">
+                        <span className="truncate"><span className="font-medium">Vol:</span> ${marketData.totalVolume.toLocaleString()}</span>
+                        <span className="truncate"><span className="font-medium">Liq:</span> ${marketData.totalLiquidity.toLocaleString()}</span>
+                        <span className="truncate"><span className="font-medium">Cat:</span> {marketData.category}</span>
+                        <span className="truncate"><span className="font-medium">Ends:</span> {new Date(marketData.endDate).toLocaleDateString()}</span>
                     </div>
                 </div>
 
@@ -364,9 +364,9 @@ export default function MarketDetailPage() {
                         
                         {/* Outcomes section */}
                         <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-white text-lg font-semibold">OUTCOME</h2>
-                                <h2 className="text-white text-lg font-semibold hidden sm:block">% CHANGE</h2>
+                            <div className="flex justify-between items-center mb-5">
+                                <h2 className="text-white text-lg font-bold tracking-tight">OUTCOMES</h2>
+                                <h2 className="text-[var(--foreground-secondary)] text-sm font-semibold hidden sm:block">% CHANGE</h2>
                             </div>
                             
                             <div className="space-y-3">

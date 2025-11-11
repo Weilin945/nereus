@@ -29,14 +29,14 @@ export default function TradingPanel({ onTrade }: TradingPanelProps) {
 
     return (
         <div className="card-surface p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4 gap-2">
-                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center shrink-0">
-                        👴
+            <div className="flex items-center justify-between mb-5 gap-2">
+                <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-9 h-9 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] rounded-full flex items-center justify-center shrink-0 shadow-[var(--elevation-2)]">
+                        <span className="text-lg">👴</span>
                     </div>
-                    <span className="text-white font-medium text-sm sm:text-base truncate">{displayName}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base truncate">{displayName}</span>
                 </div>
-                <button className="text-gray-400 hover:text-white p-1 shrink-0">
+                <button className="text-[var(--foreground-secondary)] hover:text-[var(--foreground)] p-1.5 shrink-0 transition-colors rounded-lg hover:bg-[rgba(255,255,255,0.06)]">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             strokeLinecap="round"
@@ -48,30 +48,30 @@ export default function TradingPanel({ onTrade }: TradingPanelProps) {
                 </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                <div className="flex flex-1">
+            <div className="flex flex-col sm:flex-row gap-2 mb-5">
+                <div className="flex flex-1 gap-2">
                     <button
-                        className={`flex-1 btn ${tradeSide === "buy" ? "btn-primary" : "btn-ghost"} rounded-l`}
+                        className={`flex-1 btn ${tradeSide === "buy" ? "btn-primary" : "btn-ghost"}`}
                         onClick={() => setTradeSide("buy")}
                     >
                         Buy
                     </button>
                     <button
-                        className={`flex-1 btn ${tradeSide === "sell" ? "btn-primary" : "btn-ghost"} rounded-r`}
+                        className={`flex-1 btn ${tradeSide === "sell" ? "btn-primary" : "btn-ghost"}`}
                         onClick={() => setTradeSide("sell")}
                     >
                         Sell
                     </button>
                 </div>
                 <div className="flex items-center sm:ml-2">
-                    <select className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                    <select className="w-full sm:w-auto bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.10)] border border-[var(--border-subtle)] text-white px-3 py-2 rounded-lg text-sm transition-all focus:border-[var(--primary)] focus:outline-none">
                         <option>Market</option>
                         <option>Limit</option>
                     </select>
                 </div>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-5">
                 <div className="flex flex-col sm:flex-row gap-2">
                     <button className="flex-1 btn btn-success">Yes {currentPrice}¢</button>
                     <button className="flex-1 btn btn-danger">
@@ -81,22 +81,22 @@ export default function TradingPanel({ onTrade }: TradingPanelProps) {
             </div>
 
             <div className="mb-4">
-                <label className="block text-gray-300 text-sm font-medium mb-2">Amount</label>
-                <div className="text-right mb-2">
-                    <span className="text-white text-2xl sm:text-3xl font-bold">${tradeAmount}</span>
+                <label className="block text-[var(--foreground-secondary)] text-sm font-medium mb-3">Amount</label>
+                <div className="text-right mb-3">
+                    <span className="text-white text-3xl sm:text-4xl font-bold tracking-tight" style={{letterSpacing: '-1px'}}>${tradeAmount}</span>
                 </div>
                 <div className="grid grid-cols-2 sm:flex gap-2 mb-3">
                     {quickAmounts.map((amount) => (
                         <button
                             key={amount}
-                            className="btn btn-outline"
+                            className="btn btn-chip"
                             onClick={() => setTradeAmount(tradeAmount + amount)}
                         >
                             +${amount}
                         </button>
                     ))}
                     <button
-                        className="btn btn-outline col-span-2 sm:col-span-1"
+                        className="btn btn-chip col-span-2 sm:col-span-1"
                         onClick={() => setTradeAmount(1000)}
                     >
                         Max
@@ -105,14 +105,14 @@ export default function TradingPanel({ onTrade }: TradingPanelProps) {
             </div>
 
             <button
-                className="w-full btn btn-primary py-3 text-lg"
+                className="w-full btn btn-primary py-3.5 text-base font-semibold"
                 onClick={() => onTrade?.(tradeAmount)}
             >
-                Trade
+                Place Trade
             </button>
 
-            <p className="text-gray-400 text-xs text-center mt-3">
-                By trading, you agree to the <span className="underline cursor-pointer hover:text-gray-300">Terms of Use</span>
+            <p className="text-[var(--foreground-tertiary)] text-xs text-center mt-4 leading-relaxed">
+                By trading, you agree to the <span className="underline cursor-pointer hover:text-[var(--foreground-secondary)] transition-colors">Terms of Use</span>
             </p>
         </div>
     );

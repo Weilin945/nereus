@@ -29,21 +29,28 @@ export default function HomCard({
             className="group relative overflow-hidden"
             padding="md"
         >
-            {/* Glow gradient overlay */}
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{background: "linear-gradient(140deg, rgba(0,245,255,0.10), rgba(255,31,143,0.10) 50%, rgba(123,255,91,0.08))"}} />
+            {/* Subtle gradient overlay - only visible on hover */}
+            <div 
+                className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                style={{
+                    background: "radial-gradient(circle at 50% 0%, rgba(59,130,246,0.08), transparent 70%)"
+                }} 
+            />
 
             <div className="relative space-y-3">
-                <h3 className="font-semibold text-[15px] sm:text-[16px] neon-text-cyan tracking-wide leading-snug line-clamp-2">
+                <h3 className="font-bold text-[15px] sm:text-[16px] text-[var(--foreground)] tracking-tight leading-snug line-clamp-2 transition-all group-hover:text-[var(--primary-light)]">
                     {title}
                 </h3>
-            <p className="text-xs sm:text-sm text-foreground-dim line-clamp-2">
+                <p className="text-xs sm:text-sm text-[var(--foreground-secondary)] line-clamp-2 leading-relaxed">
                     {description}
                 </p>
-                <div className="flex items-end justify-between pt-1">
-                    <span className="text-[22px] font-bold text-white drop-shadow-sm">
+                <div className="flex items-end justify-between pt-2 border-t border-[var(--border-subtle)]">
+                    <span className="text-[28px] font-bold text-white tracking-tight" style={{letterSpacing: '-1px'}}>
                         {value}
                     </span>
-                    <span className={`badge ${isPositive ? 'pos' : 'neg'}`}>{isPositive ? '+' : ''}{change.toFixed(2)}%</span>
+                    <span className={`badge ${isPositive ? 'pos' : 'neg'}`}>
+                        {isPositive ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
+                    </span>
                 </div>
             </div>
         </Card>

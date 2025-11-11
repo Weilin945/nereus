@@ -25,14 +25,12 @@ export function Card({
   children,
   ...rest
 }: CardProps) {
-  const base = `card-surface ${pad[padding]} transition-transform duration-200`;
-  const accentShadow =
-    accent === "cyan"
-      ? "shadow-[var(--shadow-neon-cyan)]"
-      : accent === "magenta"
-      ? "shadow-[var(--shadow-neon-magenta)]"
-      : "";
-  const classes = `${base} ${accentShadow} ${className}`.trim();
+  const base = `card-surface ${pad[padding]} transition-all duration-300`;
+  
+  // Subtle accent - only shows on hover
+  const accentClass = accent !== "default" ? "hover:border-[var(--border-medium)]" : "";
+  
+  const classes = `${base} ${accentClass} ${className}`.trim();
 
   const content = (
     <div className={classes} {...rest}>
@@ -42,7 +40,7 @@ export function Card({
 
   if (href) {
     return (
-      <Link href={href} className="block focus:outline-none">
+      <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] rounded-[var(--radius-md)]">
         {content}
       </Link>
     );
