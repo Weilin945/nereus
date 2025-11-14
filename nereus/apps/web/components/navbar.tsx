@@ -1,7 +1,9 @@
+"use client"
 import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
 import { NereusLogo } from "./branding"
 import { SearchInput } from "./search-input"
+import { ConnectButton } from "@mysten/dapp-kit"
 
 export function Navbar() {
   return (
@@ -15,7 +17,7 @@ export function Navbar() {
         <div className="hidden items-center gap-2 sm:flex">
           <Button variant="ghost" size="sm">Leaderboard</Button>
           <Button variant="ghost" size="sm">Referral</Button>
-          <Button size="sm">Sign in</Button>
+          <ConnectButton />
         </div>
       </div>
     </header>
