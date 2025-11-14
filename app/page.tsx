@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import HomCard from "../components/homCard";
 import Navbar from "../components/navbar";
+import Hero from "../components/hero";
 import Footer from "../components/footer";
 import { useUiStore } from "../stores/ui-store";
 
@@ -48,18 +49,7 @@ export default function Page(){
             <Navbar />
             
             {/* Hero Section */}
-            <div className="border-b border-border-subtle bg-linear-to-b from-[rgba(59,130,246,0.03)] to-transparent">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-12">
-                    <div className="max-w-3xl">
-                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight" style={{letterSpacing: '-1px'}}>
-                            Professional Prediction Markets
-                        </h1>
-                        <p className="text-base md:text-lg text-foreground-secondary leading-relaxed">
-                            Trade on future events with confidence. Powered by decentralized technology and community wisdom.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <Hero />
             
             {/* Markets Grid */}
             <div className="max-w-[1400px] mx-auto p-4 md:p-6">
