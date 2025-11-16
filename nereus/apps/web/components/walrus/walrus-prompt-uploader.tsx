@@ -1,4 +1,4 @@
-// components/walrus-code-uploader.tsx
+// components/walrus-prompt-uploader.tsx
 'use client';
 
 import { useState } from 'react';
@@ -16,45 +16,29 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
-import { vscodeDark } from '@uiw/codemirror-theme-vscode';
+import { Textarea } from '@workspace/ui/components/textarea';
 
-import { Loader2, CheckCircle2, AlertCircle, UploadCloud } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, FileText, Sparkles } from 'lucide-react';
 
-// 🔥 CodeMirror (Syntax Highlight Editor)
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-
-interface WalrusCodeUploaderProps {
+interface WalrusPromptUploaderProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	signer: any; // Signer type from Sui - accepting any to work with WalletAccount
-	defaultFilename?: string;
+	defaultPrompt?: string;
 	onUploaded?: (result: WalrusUploadResult) => void;
+	initialTitle?: string;
 }
 
-export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
-	const { signer, defaultFilename = 'snippet.ts', onUploaded } = props;
+export function WalrusPromptUploader(props: WalrusPromptUploaderProps) {
+	const { signer, defaultPrompt = '', onUploaded, initialTitle = '' } = props;
 
-	const [filename, setFilename] = useState(defaultFilename);
-	const [code, setCode] = useState<string>(
-		`// Paste or write your code here\n// This snippet will be stored on Walrus testnet\n`,
+	const [title, setTitle] = useState(initialTitle);
+	const [prompt, setPrompt] = useState<string>(
+		defaultPrompt || 
+		`// Enter your AI resolution prompt here\n// Example: Check the official BTC price on CoinGecko at the deadline.\n// If BTC is $100,000 or higher, resolve as YES. Otherwise, resolve as NO.`
 	);
 	const [uploading, setUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [result, setResult] = useState<WalrusUploadResult | null>(null);
-
-	// 🔥 根據檔名推測語言，決定 CodeMirror 語法高亮
-	const languageExtension = (() => {
-		if (filename.endsWith('.ts') || filename.endsWith('.tsx'))
-			return javascript({ typescript: true });
-
-		if (filename.endsWith('.js') || filename.endsWith('.jsx'))
-			return javascript();
-
-		if (filename.endsWith('.py')) return python();
-
-		return javascript();
-	})();
 
 	async function handleUpload() {
 		if (!signer) {
@@ -62,8 +46,8 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 			return;
 		}
 
-		if (!code.trim()) {
-			setError('Code is empty. Please write something before uploading.');
+		if (!prompt.trim()) {
+			setError('Prompt is empty. Please write an AI resolution prompt before uploading.');
 			return;
 		}
 
@@ -71,11 +55,21 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 		setError(null);
 
 		try {
+			// Create a structured prompt with metadata
+			const promptData = {
+				title: title || 'AI Resolution Prompt',
+				prompt: prompt,
+				timestamp: new Date().toISOString(),
+				type: 'ai-resolution'
+			};
+
+			const formattedPrompt = JSON.stringify(promptData, null, 2);
+
 			const res = await uploadCodeToWalrus({
-				code,
-				filename,
-				epochs: 3,
-				deletable: true,
+				code: formattedPrompt,
+				filename: 'ai-resolution-prompt.json',
+				epochs: 5,
+				deletable: false,
 				signer,
 			});
 
@@ -83,7 +77,7 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 			onUploaded?.(res);
 		} catch (err: unknown) {
 			console.error(err);
-			setError(err instanceof Error ? err.message : 'Failed to upload code to Walrus.');
+			setError(err instanceof Error ? err.message : 'Failed to upload prompt to Walrus.');
 		} finally {
 			setUploading(false);
 		}
@@ -98,11 +92,11 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 				<div className="flex items-center justify-between gap-2">
 					<div>
 						<CardTitle className="flex items-center gap-2">
-							<UploadCloud className="h-5 w-5" />
-							<span>Walrus Code Uploader</span>
+							<Sparkles className="h-5 w-5 text-purple-500" />
+							<span>AI Prompt Uploader</span>
 						</CardTitle>
 						<CardDescription>
-							Edit your code and store it as a Walrus blob on Sui testnet.
+							Create and store your AI resolution prompt as a Walrus blob on Sui testnet.
 						</CardDescription>
 					</div>
 					<Badge variant={signer ? 'default' : 'outline'}>
@@ -113,30 +107,44 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 
 			<CardContent className="space-y-4">
 				<div className="space-y-2">
-					<Label htmlFor="filename">File name</Label>
+					<Label htmlFor="prompt-title">Prompt Title (Optional)</Label>
 					<Input
-						id="filename"
-						value={filename}
-						onChange={(e) => setFilename(e.target.value)}
-						placeholder="snippet.ts"
+						id="prompt-title"
+						value={title}
+						onChange={(e) => setTitle(e.target.value)}
+						placeholder="e.g., BTC Price Resolution Prompt"
 					/>
 				</div>
 
-				{/* 🔥 直接把 Textarea 換成 CodeMirror Editor */}
 				<div className="space-y-2">
-					<Label>Code</Label>
-					<div className="border border-border rounded-md overflow-hidden">
-						<CodeMirror
-							value={code}
-							height="300px"
-							theme={vscodeDark}
-							extensions={[languageExtension]}
-							onChange={(value) => setCode(value)}
-						/>
-					</div>
-					<p className="text-xs text-muted-foreground text-right">
-						{code.length} characters
+					<Label htmlFor="ai-prompt">AI Resolution Prompt</Label>
+					<p className="text-xs text-muted-foreground">
+						Describe how the AI should evaluate and resolve your market. Be specific about data sources, conditions, and expected outcomes.
 					</p>
+					<Textarea
+						id="ai-prompt"
+						value={prompt}
+						onChange={(e) => setPrompt(e.target.value)}
+						placeholder="Enter your AI resolution instructions..."
+						rows={12}
+						className="font-mono text-sm"
+					/>
+					<p className="text-xs text-muted-foreground text-right">
+						{prompt.length} characters
+					</p>
+				</div>
+
+				{/* Example Prompts Section */}
+				<div className="p-4 bg-muted/50 rounded-lg space-y-2">
+					<div className="flex items-center gap-2">
+						<FileText className="h-4 w-4 text-muted-foreground" />
+						<span className="text-sm font-medium">Example Prompts:</span>
+					</div>
+					<ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+						<li>Check [data source] for [metric] at [time]. If [condition], resolve YES, else NO.</li>
+						<li>Compare [entity A] and [entity B] based on [criteria]. Resolve to the winner.</li>
+						<li>Verify if [event] occurred by checking [source]. Resolve accordingly.</li>
+					</ul>
 				</div>
 
 				{error && (
@@ -150,7 +158,7 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 					<div className="space-y-2 rounded-md border border-emerald-500/40 bg-emerald-500/5 px-3 py-3 text-sm">
 						<div className="flex items-center gap-2 mb-1">
 							<CheckCircle2 className="h-4 w-4 text-emerald-500" />
-							<span className="font-medium text-emerald-500">Upload succeeded</span>
+							<span className="font-medium text-emerald-500">Prompt uploaded successfully</span>
 						</div>
 						<div className="space-y-1 text-xs md:text-sm">
 							<div>
@@ -184,11 +192,11 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 				</p>
 				<Button
 					onClick={handleUpload}
-					disabled={uploading || !signer}
+					disabled={uploading || !signer || !prompt.trim()}
 					className="gap-2 transition-transform active:scale-[0.97]"
 				>
 					{uploading && <Loader2 className="h-4 w-4 animate-spin" />}
-					<span>{uploading ? 'Uploading to Walrus…' : 'Upload to Walrus'}</span>
+					<span>{uploading ? 'Uploading to Walrus…' : 'Upload Prompt'}</span>
 				</Button>
 			</CardFooter>
 		</Card>

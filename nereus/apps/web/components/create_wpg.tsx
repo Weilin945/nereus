@@ -7,10 +7,10 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { WalrusCodeUploader } from "./walrus/walrus-code-uploader";
-import type { WalrusUploadResult } from "@/lib/walrus/uploadToWalrus";
+import { WalrusPromptUploader } from "./walrus/walrus-prompt-uploader";
+import type { WalrusUploadResult } from "@/store/move/walrus/walrusRelay";
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { createMarketTx } from "@/store/move/create";
-import { uploadFile } from "@/store/move/walrus/walrusRelay";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
@@ -39,6 +39,7 @@ interface FormState {
 	endTime: string;
 	resolutionType: "ai" | "code" | "";
 	aiPrompt: string;
+	aiPromptUploadResult: WalrusUploadResult | null;
 	codeUploadResult: WalrusUploadResult | null;
 }
 
@@ -92,6 +93,7 @@ const initialState: FormState = {
 	endTime: "",
 	resolutionType: "",
 	aiPrompt: "",
+	aiPromptUploadResult: null,
 	codeUploadResult: null,
 };
 
@@ -159,6 +161,10 @@ export function CreateWizard() {
 		setForm({ ...form, codeUploadResult: result });
 	};
 
+	const handleAIPromptUpload = (result: WalrusUploadResult) => {
+		setForm({ ...form, aiPromptUploadResult: result });
+	};
+
 	const canProceed = (() => {
 		if (step === 0) return false; // Templates page handles navigation
 		if (step === 1) return form.name.trim().length > 0 && form.rules.trim().length > 0;
@@ -197,7 +203,7 @@ export function CreateWizard() {
 				{step === 0 && <TemplatesPage onSelectTemplate={selectTemplate} onCreateFromScratch={createFromScratch} />}
 				{step === 1 && <MarketDetailsPage form={form} update={update} />}
 				{step === 2 && <CategoryAndEndDatePage form={form} update={update} />}
-				{step === 3 && <ResolutionTypePage form={form} onSelectType={selectResolutionType} onWalrusUpload={handleWalrusUpload} update={update} />}
+				{step === 3 && <ResolutionTypePage form={form} onSelectType={selectResolutionType} onWalrusUpload={handleWalrusUpload} onAIPromptUpload={handleAIPromptUpload} />}
 				{step === 4 && <ReviewPage form={form} />}
 				<div className="flex justify-between pt-2">
 					<Button variant="outline" onClick={prev} disabled={step === 0 || submitting}>
@@ -396,14 +402,14 @@ function ResolutionTypePage({
 	form, 
 	onSelectType,
 	onWalrusUpload,
-	update 
+	onAIPromptUpload,
 }: { 
 	form: FormState;
 	onSelectType: (type: "ai" | "code" | "") => void;
 	onWalrusUpload: (result: WalrusUploadResult) => void;
-	update?: (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+	onAIPromptUpload: (result: WalrusUploadResult) => void;
 }) {
-    const curacc = useCurrentAccount()?.address;
+    const curacc = useCurrentAccount();
 	if (form.resolutionType === "") {
 		return (
 			<div className="space-y-6">
@@ -457,21 +463,20 @@ function ResolutionTypePage({
 					</Button>
 				</div>
 				
-				<div className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="aiPrompt">Resolution Prompt</Label>
-						<p className="text-sm text-muted-foreground">
-							Enter a detailed prompt that explains how the AI should evaluate and resolve this market
+				<WalrusPromptUploader 
+					signer={curacc || null} 
+					defaultPrompt={form.aiPrompt}
+					initialTitle={form.name}
+					onUploaded={onAIPromptUpload}
+				/>
+				
+				{form.aiPromptUploadResult && (
+					<div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+						<p className="text-sm text-green-800">
+							✅ AI Prompt uploaded successfully! Blob ID: {form.aiPromptUploadResult.blobId}
 						</p>
-						<Textarea 
-							id="aiPrompt" 
-							placeholder="Example: Check the official BTC price on CoinGecko at the deadline. If BTC price is $100,000 or higher, resolve as YES. Otherwise, resolve as NO."
-							value={form.aiPrompt} 
-							onChange={update?.("aiPrompt")} 
-							rows={6}
-						/>
 					</div>
-				</div>
+				)}
 			</div>
 		);
 	}
@@ -550,9 +555,9 @@ function ReviewPage({ form }: { form: FormState }) {
 				<div>
 					<span className="font-semibold">Resolution Type:</span> {form.resolutionType === "ai" ? "AI Resolution" : form.resolutionType === "code" ? "Code Resolution" : "—"}
 				</div>
-				{form.resolutionType === "ai" && form.aiPrompt && (
+				{form.resolutionType === "ai" && form.aiPromptUploadResult && (
 					<div>
-						<span className="font-semibold">AI Prompt:</span> {form.aiPrompt}
+						<span className="font-semibold">AI Prompt Blob ID:</span> {form.aiPromptUploadResult.blobId}
 					</div>
 				)}
 				{form.resolutionType === "code" && form.codeUploadResult && (

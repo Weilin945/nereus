@@ -9,26 +9,19 @@ import type { Signer } from '@mysten/sui/cryptography';
 import { client } from './client';
 
 // Create a keypair using environment variable for secure key management
-const getKeypair = (): Ed25519Keypair => {
-	const secretKey = process.env.WALRUS_SECRET_KEY;
-	
-	if (!secretKey) {
-		throw new Error('WALRUS_SECRET_KEY environment variable is required. Please set it in your .env.local file.');
-	}
-	
+async function getKeypair(): Promise<Ed25519Keypair> {
+
 	try {
-		// Decode the base64 secret key
-		const secretKeyBytes = Uint8Array.from(atob(secretKey), c => c.charCodeAt(0));
-		return Ed25519Keypair.fromSecretKey(secretKeyBytes);
+		return Ed25519Keypair.fromSecretKey("suiprivkey1qrqp6xtphngqg9nh488v6hyvev229wl6w964nuukl9l95c090pkskvuznyd");
 	} catch {
 		throw new Error('Invalid WALRUS_SECRET_KEY format. Please ensure it is a valid base64 encoded secret key.');
 	}
 };
 
-const keypair = getKeypair();
 
 // Legacy upload function for backward compatibility
 export async function uploadFile(text: string) {
+	const keypair = await getKeypair();
 	await requestSuiFromFaucetV2({
 		host: getFaucetHost('testnet'),
 		recipient: keypair.getPublicKey().toSuiAddress(),
@@ -63,6 +56,12 @@ export interface UploadCodeParams {
 
 // Enhanced upload function using Walrus upload relay and WalrusFile
 export async function uploadCodeToWalrus(params: UploadCodeParams): Promise<WalrusUploadResult> {
+		const keypair = await getKeypair();
+	await requestSuiFromFaucetV2({
+		host: getFaucetHost('testnet'),
+		recipient: keypair.getPublicKey().toSuiAddress(),
+	});
+
 	const { code, filename, epochs, deletable, signer } = params;
 
 	try {
