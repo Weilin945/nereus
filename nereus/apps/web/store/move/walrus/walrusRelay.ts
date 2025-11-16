@@ -20,9 +20,7 @@ async function getKeypair(): Promise<Ed25519Keypair> {
 
 export async function uploadFile(text: string) {
 	const keypair = await getKeypair()
-
 	const file = new TextEncoder().encode(text);
-
 	const { blobId, blobObject } = await client.walrus.writeBlob({
 		blob: file,
 		deletable: true,

@@ -81,13 +81,7 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 
 			const formattedCode = JSON.stringify(codeData, null, 2);
 
-			const res = await uploadFile({
-				code: formattedCode,
-				filename: filename || 'snippet.ts',
-				epochs: 3,
-				deletable: true,
-				signer,
-			});
+			const res = await uploadFile(formattedCode);
 
 			setResult(res);
 			onUploaded?.(res);
