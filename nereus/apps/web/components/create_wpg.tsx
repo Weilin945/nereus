@@ -187,32 +187,37 @@ export function CreateWizard() {
 			const endDateTime = new Date(`${form.endDate}T${form.endTime}`);
 			const endTimeTimestamp = Math.floor(endDateTime.getTime() / 1000); // Convert to seconds
 			const startTimeTimestamp = Math.floor(Date.now() / 1000); // Current time in seconds
+			console.log(form)
 
 			// Create the market transaction
 			const tx = new Transaction();
+						// Add resolution configuration if we have uploaded content
+			let list: any[];			
+			// console.log(form.codeUploadResult?.blobId)
+			if (form.resolutionType === "ai" && form.aiPromptUploadResult && form.userEnteredPrompt) {
+				console.log("ai")
+				list = createConfigTx(
+					tx,
+					form.userEnteredPrompt, // Use the original user-entered prompt as code_hash
+					form.aiPromptUploadResult.blobId
+				);
+			} else if (form.resolutionType === "code" && form.codeUploadResult && form.userEnteredCode) {
+					console.log("code")
+					list = createConfigTx(
+					tx,
+					form.userEnteredCode, // Use the original user-entered code as code_hash
+					form.codeUploadResult.blobId
+				);
+			}
 			createMarketTx(
 				tx,
+				list,
 				form.name,
 				form.marketRules || form.rules,
 				startTimeTimestamp,
 				endTimeTimestamp
 			);
-			
-			// Add resolution configuration if we have uploaded content
-			if (form.resolutionType === "ai" && form.aiPromptUploadResult) {
-				createConfigTx(
-					tx,
-					"ai_resolution", // code_hash for AI resolution
-					form.aiPromptUploadResult.blobId
-				);
-			} else if (form.resolutionType === "code" && form.codeUploadResult) {
-				createConfigTx(
-					tx,
-					"code_resolution", // code_hash for code resolution
-					form.codeUploadResult.blobId
-				);
-			}
-			
+
 			signAndExecuteTransaction({ transaction: tx });
 			
 		} catch (error) {
@@ -495,13 +500,6 @@ function ResolutionTypePage({
 					onUploaded={onAIPromptUpload}
 				/>
 				
-				{form.aiPromptUploadResult && (
-					<div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-						<p className="text-sm text-green-800">
-							✅ AI Prompt uploaded successfully! Blob ID: {form.aiPromptUploadResult.blobId}
-						</p>
-					</div>
-				)}
 			</div>
 		);
 	}
@@ -523,13 +521,7 @@ function ResolutionTypePage({
 					onUploaded={onWalrusUpload}
 				/>
 				
-				{form.codeUploadResult && (
-					<div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-						<p className="text-sm text-green-800">
-							✅ Code uploaded successfully! Blob ID: {form.codeUploadResult.blobId}
-						</p>
-					</div>
-				)}
+				
 			</div>
 		);
 	}
