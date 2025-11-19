@@ -1,5 +1,5 @@
 import { Transaction } from "@mysten/sui/transactions";
-import {market} from "./package";
+import {market, oracle} from "./package";
 
 export function createMarketTx(
     tx: Transaction,
@@ -12,7 +12,7 @@ export function createMarketTx(
     tx.moveCall({
         target: market+"::create_market",
         arguments: [
-            tx.object(objlist[0]),
+            objlist[0],
             tx.pure.string(topic),
             tx.pure.string(description),
             tx.pure.u64(start_time),
@@ -22,14 +22,16 @@ export function createMarketTx(
     tx.moveCall({
         target: "0x2::transfer::public_share_object",
         arguments: [
-            tx.object(objlist[0]),
-        ]
+            objlist[0],
+        ],
+        typeArguments: [oracle+"::TruthOracleHolder"],
     })
-        tx.moveCall({
+    tx.moveCall({
         target: "0x2::transfer::public_share_object",
         arguments: [
-            tx.object(objlist[1]),
-        ]
+            objlist[1],
+        ],
+        typeArguments: [oracle+"::OracleConfig"],
     })
     return tx;
 }

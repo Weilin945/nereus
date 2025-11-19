@@ -1,101 +1,84 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect } from "react"
 import { CategoryTabs } from "./category-tabs"
-import { Market, MarketCardLarge, MarketCardMedium, MarketCardSmall } from "./market/market-card"
-
-const MOCK: Market[] = [
-  {
-    id: "1",
-    title: "Will GDP growth be negative in Q3 2025?",
-    category: "Economy",
-    volume: "$310,434",
-    yes: 12,
-    no: 88,
-  },
-  {
-    id: "2",
-    title: "Fed decision in December? 25bps decrease",
-    category: "Economy",
-    volume: "$91m",
-    yes: 54,
-    no: 46,
-  },
-  {
-    id: "3",
-    title: "$SOL above $150 by month end?",
-    category: "Crypto",
-    volume: "$15,679",
-    yes: 42,
-    no: 58,
-  },
-  {
-    id: "4",
-    title: "Super Bowl Champion 2026: Los Angeles?",
-    category: "Sports",
-    volume: "$529m",
-    yes: 11,
-    no: 89,
-  },
-  {
-    id: "5",
-    title: "House passes disclosure resolution in November?",
-    category: "Politics",
-    volume: "$268k",
-    yes: 91,
-    no: 9,
-  },
-  {
-    id: "6",
-    title: "Will US gov shutdown happen in 2025?",
-    category: "Politics",
-    volume: "$12k",
-    yes: 26,
-    no: 74,
-  },
-]
+import {  MarketCard, MarketCardGrid, MarketCardSmall } from "./market/market-card"
+import { storeStore, type Market } from "@/store/storeStore"
+// 引入剛寫好的 Sidebar (路徑請依你的專案結構調整，假設在同一層或 components)
+import { MarketDetailSidebar } from "./sneakpeek/peekCard" 
 
 export function MarketGrid() {
-  const [selectedMarket, setSelectedMarket] = useState<Market | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  // 1. 改用 Store 中的 setSelectedMarket，移除原本的 useState
+  const { marketList, queryMarkets, setSelectedMarket } = storeStore()
+  
+  useEffect(() => {
+    queryMarkets()
+  }, [queryMarkets])
 
-  const handleMarketClick = (market: Market, _side?: "yes" | "no") => {
+  // 2. 點擊時，直接更新 Global Store，Sidebar 就會自動偵測到變化並滑出
+  const handleMarketClick = (market: Market, side?: "yes" | "no") => {
     setSelectedMarket(market)
-    setIsModalOpen(true)
+    console.log('Market clicked:', market.topic, side)
   }
 
+  if (marketList.length === 0) {
+    return (
+      <section className="mx-auto w-full max-w-7xl px-4">
+        <CategoryTabs>
+          {() => (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading markets...</p>
+            </div>
+          )}
+        </CategoryTabs>
+      </section>
+    )
+  }
+
+  // ⚠️ 重要修正：移除了 marketList.forEach(...) 
+  // 原因：在 render 過程中直接呼叫 API (getPrices) 會導致效能災難和無限迴圈。
+  // 且你的 Store 已經在 queryMarkets 時抓好價格了。
+
   return (
-    <section className="mx-auto w-full max-w-7xl px-4">
+    <section className="mx-auto w-full max-w-7xl px-4 relative">
+      {/* 3. 放入 Sidebar 元件，它預設是隱藏的 (fixed position) */}
+      <MarketDetailSidebar />
+
       <CategoryTabs>
         {() => (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div className="md:col-span-6">
-              <MarketCardLarge m={MOCK[0]!} onMarketClick={handleMarketClick} />
-            </div>
-            <div className="md:col-span-3">
-              <MarketCardMedium m={MOCK[1]!} onMarketClick={handleMarketClick} />
-            </div>
-            <div className="md:col-span-3">
-              <MarketCardMedium m={MOCK[2]!} onMarketClick={handleMarketClick} />
-            </div>
-            <div className="md:col-span-3">
-              <MarketCardSmall m={MOCK[3]!} onMarketClick={handleMarketClick} />
-            </div>
-            <div className="md:col-span-3">
-              <MarketCardSmall m={MOCK[4]!} onMarketClick={handleMarketClick} />
-            </div>
-            <div className="md:col-span-3">
-              <MarketCardSmall m={MOCK[5]!} onMarketClick={handleMarketClick} />
-            </div>
+            {/* Large Card */}
+            {marketList[0] && (
+              <div className="md:col-span-6">
+                <MarketCard m={marketList[0]} onMarketClick={handleMarketClick} />
+              </div>
+            )}
+            
+            {/* Medium Cards */}
+            {marketList[1] && (
+              <div className="md:col-span-3">
+                <MarketCardGrid m={marketList[1]} onMarketClick={handleMarketClick} />
+              </div>
+            )}
+            {marketList[2] && (
+              <div className="md:col-span-3">
+                <MarketCardGrid m={marketList[2]} onMarketClick={handleMarketClick} />
+              </div>
+            )}
+
+            {/* Small Cards */}
+            {marketList.slice(3, 6).map((market) => (
+              <div key={market.address} className="md:col-span-3">
+                <MarketCardSmall m={market} onMarketClick={handleMarketClick} />
+              </div>
+            ))}
+            
             <div className="md:col-span-12">
-              {/* Footer bar placeholder matching figma */}
-              <div className="rounded-md bg-primary/20 p-3" />
+              <div className="h-12" /> {/* Spacer for footer */}
             </div>
           </div>
         )}
       </CategoryTabs>
-      
-
     </section>
   )
 }

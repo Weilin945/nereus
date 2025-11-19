@@ -30,6 +30,6 @@ export function createMarketTx(
         ],
     });
 
-    return [[holder],[config]];
+    return [holder,config];
 }
 

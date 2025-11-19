@@ -218,7 +218,10 @@ export function CreateWizard() {
 				endTimeTimestamp
 			);
 
-			signAndExecuteTransaction({ transaction: tx });
+			signAndExecuteTransaction({ transaction: tx },{
+										onSuccess: (result) => {
+											console.log('object changes', result.objectChanges);										},
+									},);
 			
 		} catch (error) {
 			console.error("Error creating market:", error);
