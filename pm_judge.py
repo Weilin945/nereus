@@ -281,7 +281,7 @@ def ai_adjudicate(question: str, cutoff_iso: str, detailed_rules: str) -> (str, 
         "7. **Numbers:** Compare exact numbers strictly.\n"
         "8. **Consensus:** Single source = NO. If major outlets (Reuters, AP) are silent on a 'war/missile' event, it didn't happen.\n"
         "9. **Explicit Denial:** If an authority denies it, answer NO.\n"
-        "10. **Format:** Return *only* one of three words: YES / NO / INSUFFICIENT.\n\n"
+        "10. **Format:** Return *only* one of three words: YES / NO .\n\n"
         "**OUTPUT FORMAT:**\n"
         "REASONING: [Does the body text match the header date? Are there conflicting dates (e.g. Jan vs Nov)? Is there a consensus?]\n"
         "VERDICT: [YES / NO ]\n\n"
