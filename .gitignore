@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+# 建議加上 .venv 或其他虛擬環境資料夾
+.venv
