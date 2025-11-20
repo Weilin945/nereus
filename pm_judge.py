@@ -1,6 +1,6 @@
 # pm_judge.py
-#用法：在終端機執行：python  pm_judge.py "想判定的已結束事件"
-#ex. python  pm_judge.py "CMA Awards: Album of the Year"
+#用法：在終端機執行：python  pm_judge.py "想判定的已結束事件(盡量是yes,no question，如果不是會自動把question變成子題目)"
+#ex. python  pm_judge.py "Will Yann LeCun leave Meta this year?"
 # 具備：數學比對、選舉定義、比較搜尋、現狀判定、威脅 vs 事實區分、推理過程輸出、假新聞定義
 import os, sys, json, time, re, requests
 from datetime import datetime, timezone, timedelta
@@ -284,7 +284,7 @@ def ai_adjudicate(question: str, cutoff_iso: str, detailed_rules: str) -> (str, 
         "10. **Format:** Return *only* one of three words: YES / NO / INSUFFICIENT.\n\n"
         "**OUTPUT FORMAT:**\n"
         "REASONING: [Does the body text match the header date? Are there conflicting dates (e.g. Jan vs Nov)? Is there a consensus?]\n"
-        "VERDICT: [YES / NO / INSUFFICIENT]\n\n"
+        "VERDICT: [YES / NO ]\n\n"
         f"**Question:** {question}\n"
         f"**DETAILED MARKET RULES:** {detailed_rules}\n"
         f"**Fact found:** {fact_string}\n"
