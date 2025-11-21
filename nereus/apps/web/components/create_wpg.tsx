@@ -104,8 +104,11 @@ const initialState: FormState = {
 	codeUploadResult: null,
 };
 
+import { useRouter } from "next/navigation";
+
 export function CreateWizard() {
 	const client = useSuiClient();
+	const router = useRouter();
 	const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction({
 		execute: async ({ bytes, signature }) =>
 			await client.executeTransactionBlock({
@@ -223,6 +226,7 @@ export function CreateWizard() {
 											console.log('object changes', result.objectChanges);										},
 									},);
 			
+			router.push("/")
 		} catch (error) {
 			console.error("Error creating market:", error);
 		} finally {

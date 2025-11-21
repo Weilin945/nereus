@@ -37,7 +37,7 @@ export function WalrusCodeUploader(props: WalrusCodeUploaderProps) {
 
 	const [filename, setFilename] = useState(defaultFilename);
 	const [code, setCode] = useState<string>(
-		`// Paste or write your code here\n// This snippet will be stored on Walrus testnet\n`,
+		`// Paste or write your code here\n// This snippet will be stored on Walrus testnet\n//To Resolve conditions, make the def main() return "yes" or "no"\n\ndef main():\n    # Your code logic here\n    return "yes"  # or "no"\n`,
 	);
 	const [uploading, setUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);

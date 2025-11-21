@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Separator } from "@workspace/ui/components/separator"
+import { Button } from "@workspace/ui/components/button"
 import { PricePill } from "./price-pill"
 import { Sparkline } from "./sparkline"
 import { Stat } from "./stat"
@@ -7,6 +8,7 @@ import { Market } from "@/store/storeStore"
 import { useBuyYes } from "@/hooks/useBuyYes"
 import { useBuyNo } from "@/hooks/useBuyNo"
 import { FlipBuyButton } from "./flip-buy-button"
+import Link from "next/link"
 
 // Utility function to format countdown from timestamp
 function formatCountdown(endTime: number): string {
@@ -95,19 +97,26 @@ export function MarketCard({ m, onMarketClick }: MarketCardProps) {
             </div>
           </div>
 
-          <div className="mt-auto flex gap-2 pt-2">
-            <FlipBuyButton
-              side="YES"
-              price={yesFee ?? 0}
-              onConfirm={(amount) => handleBuyYes(m, amount)}
-              className={`flex-1 min-w-[80px] ${isEnded ? "hidden" : ""}`}
-            />
-            <FlipBuyButton
-              side="NO"
-              price={noFee ?? 0}
-              onConfirm={(amount) => handleBuyNo(m, amount)}
-              className={`flex-1 min-w-[80px] ${isEnded ? "hidden" : ""}`}
-            />
+          <div className="mt-auto space-y-2 pt-2">
+            <div className="flex gap-2">
+              <FlipBuyButton
+                side="YES"
+                price={yesFee ?? 0}
+                onConfirm={(amount) => handleBuyYes(m, amount)}
+                className={`flex-1 min-w-[80px] ${isEnded ? "hidden" : ""}`}
+              />
+              <FlipBuyButton
+                side="NO"
+                price={noFee ?? 0}
+                onConfirm={(amount) => handleBuyNo(m, amount)}
+                className={`flex-1 min-w-[80px] ${isEnded ? "hidden" : ""}`}
+              />
+            </div>
+            <Link href={`/market?id=${m.address}`}>
+              <Button variant="outline" className="w-full" size="sm">
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
       </CardContent>
@@ -182,6 +191,12 @@ export function MarketCardGrid({ m, onMarketClick }: MarketCardProps) {
              <Stat label="Ends" value={countdown} />
              <Stat label="Fee" value={`Y:${yesFee ?? "-"} N:${noFee ?? "-"}`} />
         </div>
+        
+        <Link href={`/market?id=${m.address}`}>
+          <Button variant="outline" className="w-full" size="sm">
+            View Details
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   )
@@ -224,6 +239,11 @@ export function MarketCardSmall({ m, onMarketClick }: MarketCardProps) {
                 </span>
             </div>
         </div>
+        <Link href={`/market?id=${m.address}`}>
+          <Button variant="outline" className="w-full mt-2" size="sm">
+            View Details
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   )

@@ -41,6 +41,7 @@ export const storeStore = create<StoreState>((set) => ({
   selectedMarket: null,
   selectedSide: null,
   user: { USDC: [], YesPositions: [], NoPositions: [] },
+  
 
   queryMarkets: async () => {
     const res = await gqlQuery(`
@@ -65,20 +66,32 @@ export const storeStore = create<StoreState>((set) => ({
     const marketPromises = nodes.map(async (node: any) => {
       const content = node.asMoveObject.contents.json;
       const prices = await getPrices(node.address);
-      
+
+      // Extract category from topic using regex
+      const regex = /#([a-zA-Z0-9]+)/;
+      const match = content.topic.match(regex);
+
+      let category = null;
+      let topic = content.topic;
+
+      if (match) {
+      category = match[1];
+      topic = content.topic.replace(match[0], "").trim();
+      }
+
       return {
-        address: node.address,
-        balance: parseInt(content.balance),
-        description: content.description,
-        topic: content.topic,
-        start_time: parseInt(content.start_time),
-        end_time: parseInt(content.end_time),
-        no: parseInt(content.no),
-        yes: parseInt(content.yes),
-        oracle_config: content.oracle_config_id,
-        yesprice: prices ? prices[0] : undefined,
-        noprice: prices ? prices[1] : undefined,
-        
+      address: node.address,
+      balance: parseInt(content.balance),
+      description: content.description,
+      topic: topic,
+      start_time: parseInt(content.start_time),
+      end_time: parseInt(content.end_time),
+      no: parseInt(content.no),
+      yes: parseInt(content.yes),
+      oracle_config: content.oracle_config_id,
+      yesprice: prices ? prices[0] : undefined,
+      noprice: prices ? prices[1] : undefined,
+      category,
       };
     });
 
@@ -125,4 +138,7 @@ export const storeStore = create<StoreState>((set) => ({
   setMarketList: (markets: Market[]) => set({ marketList: markets }),
   setSelectedMarket: (market: Market | null) => set({ selectedMarket: market }),
   selectTrade: (market, side) => set({ selectedMarket: market, selectedSide: side }),
+  getallcat(): string[] {
+
+},
 }));
