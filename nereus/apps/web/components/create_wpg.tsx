@@ -15,7 +15,7 @@ import { createMarketTx as createConfigTx } from "@/store/move/create_config";
 import { Transaction } from "@mysten/sui/transactions";
 import { sealClient } from "@/utils/sealClient";
 import { SealApiKeyUploader } from "./walrus/seal-api-uploader";
-
+import { base } from "@/store/move/package";
 type Step = 0 | 1 | 2 | 3 | 4;
 
 interface Template {
@@ -511,7 +511,7 @@ function ResolutionTypePage({
 				<SealApiKeyUploader
 				signer={curacc || null}
 				sealClient={sealClient}
-				packageId="0xYOUR_POLICY_PACKAGE"
+				packageId={base}
 				policyId="0xYOUR_POLICY_ID_WITHOUT_PACKAGE_PREFIX"
 				threshold={2}
 				/>

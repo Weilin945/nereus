@@ -26,9 +26,8 @@ import {
   KeyRound,
 } from 'lucide-react';
 
-import { fromHEX } from '@mysten/sui/utils';
 import type { SealClient } from '@mysten/seal';
-
+import { fromHex } from '@mysten/sui/utils';
 type ApiKeyEntry = {
   name: string;
   value: string;
@@ -125,8 +124,8 @@ export function SealApiKeyUploader(props: SealApiKeyUploaderProps) {
 
         const { encryptedObject } = await sealClient.encrypt({
           threshold,
-          packageId: fromHEX(packageId),
-          id: fromHEX(policyId),
+          packageId: fromHex(packageId),
+          id: fromHex(policyId),
           data,
         });
 
