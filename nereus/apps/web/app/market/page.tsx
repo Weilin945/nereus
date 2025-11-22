@@ -8,6 +8,7 @@ import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import { FlipBuyButton } from "../../components/market/flip-buy-button";
 import { Clock, Database, Wallet } from "lucide-react";
+import MarketChatRoom from "@/components/market/ChatRoom";
 
 function calculatePercentage(value: number, total: number): number {
 	if (total === 0) return 0;
@@ -21,6 +22,12 @@ export default function MarketPage() {
 	const marketId = searchParams.get("id");
 	const { marketList } = storeStore();
 	const market = marketList.find((m) => m.address === marketId);
+
+	// ✅ hooks 一定要在條件 return 之前宣告
+	const [amount, setAmount] = React.useState("");
+	const [selectedSide, setSelectedSide] = React.useState<"YES" | "NO" | null>(
+		null,
+	);
 
 	if (!market) {
 		return <div className="p-8 text-center">Market not found.</div>;
@@ -38,162 +45,203 @@ export default function MarketPage() {
 		console.log("Resolve button pressed for market:", marketId);
 	};
 
-
-	// 新增本地 state
-	const [amount, setAmount] = React.useState("");
-	const [selectedSide, setSelectedSide] = React.useState<'YES' | 'NO' | null>(null);
-
 	// 計算區塊
-	const currentFee = selectedSide === 'YES' ? (typeof yesFee === 'number' ? yesFee : 0) : selectedSide === 'NO' ? (typeof noFee === 'number' ? noFee : 0) : 0;
+	const currentFee =
+		selectedSide === "YES"
+			? typeof yesFee === "number"
+				? yesFee
+				: 0
+			: selectedSide === "NO"
+				? typeof noFee === "number"
+					? noFee
+					: 0
+				: 0;
 	const parsedAmount = parseFloat(amount);
 	const isValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
-	const currentTotal = (currentFee && isValidAmount)
-		? (currentFee * parsedAmount).toFixed(4)
-		: "0.0000";
+	const currentTotal =
+		currentFee && isValidAmount
+			? (currentFee * parsedAmount).toFixed(4)
+			: "0.0000";
 
 	return (
-		<div className="max-w-3xl mx-auto py-8">
-			<div className="space-y-6">
-				<div className="flex items-start justify-between">
-					<div>
-						<h2 className="text-2xl font-bold leading-tight">{market.topic}</h2>
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<span className="bg-muted px-2 py-0.5 rounded text-xs font-mono">ID: {market.address.slice(0, 6)}...{market.address.slice(-4)}</span>
+		<div className="max-w-6xl mx-auto px-4 py-8">
+			{/* 🔹 左右兩欄：左邊 market、右邊 chat；小螢幕時會上下堆疊 */}
+			<div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] items-start">
+				{/* 左側：原本的 market 內容 */}
+				<div className="space-y-6">
+					<div className="flex items-start justify-between">
+						<div>
+							<h2 className="text-2xl font-bold leading-tight">
+								{market.topic}
+							</h2>
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<span className="bg-muted px-2 py-0.5 rounded text-xs font-mono">
+									ID: {market.address.slice(0, 6)}...
+									{market.address.slice(-4)}
+								</span>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div className="rounded-lg border bg-card p-4 shadow-sm">
-					<div className="mb-4 flex justify-between items-center">
-						<span className="text-sm font-medium">Price History</span>
-						<div className="flex gap-2">
-							<PricePill side="Yes" price={yesPercentage} />
-							<PricePill side="No" price={noPercentage} />
+					<div className="rounded-lg border bg-card p-4 shadow-sm">
+						<div className="mb-4 flex justify-between items-center">
+							<span className="text-sm font-medium">Price History</span>
+							<div className="flex gap-2">
+								<PricePill side="Yes" price={yesPercentage} />
+								<PricePill side="No" price={noPercentage} />
+							</div>
 						</div>
+						<Sparkline width={600} height={200} className="w-full" />
 					</div>
-					<Sparkline width={600} height={200} className="w-full" />
-				</div>
 
-				<div className="space-y-2">
-					<h3 className="font-semibold text-lg">Description</h3>
-					<p className="text-muted-foreground leading-relaxed">{market.description}</p>
-				</div>
+					<div className="space-y-2">
+						<h3 className="font-semibold text-lg">Description</h3>
+						<p className="text-muted-foreground leading-relaxed">
+							{market.description}
+						</p>
+					</div>
 
-				<Separator />
+					<Separator />
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="space-y-1">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Clock className="h-4 w-4" /> Start Time
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-1">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Clock className="h-4 w-4" /> Start Time
+							</div>
+							<p className="font-medium">
+								{formatDate(market.start_time)}
+							</p>
 						</div>
-						<p className="font-medium">{formatDate(market.start_time)}</p>
-					</div>
-					<div className="space-y-1">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Clock className="h-4 w-4" /> End Time
+						<div className="space-y-1">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Clock className="h-4 w-4" /> End Time
+							</div>
+							<p className="font-medium">
+								{formatDate(market.end_time)}
+							</p>
 						</div>
-						<p className="font-medium">{formatDate(market.end_time)}</p>
-					</div>
-					<div className="space-y-1">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Wallet className="h-4 w-4" /> Pool Balance
+						<div className="space-y-1">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Wallet className="h-4 w-4" /> Pool Balance
+							</div>
+							<p className="font-medium">
+								{market.balance / 1e9} USDC
+							</p>
 						</div>
-						<p className="font-medium">{market.balance / 1e9} USDC</p>
-					</div>
-					<div className="space-y-1">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Database className="h-4 w-4" /> Oracle Config
-						</div>
-						<p className="font-medium truncate" title={market.oracle_config}>{market.oracle_config}</p>
-					</div>
-				</div>
-
-				<div className="bg-muted/30 p-4 rounded-lg border space-y-2">
-					<h4 className="font-semibold text-sm">Fee Structure</h4>
-					<div className="flex justify-between text-sm">
-						<span>Yes Position Fee:</span>
-						<span className="font-mono">{yesFee} USDC</span>
-					</div>
-					<div className="flex justify-between text-sm">
-						<span>No Position Fee:</span>
-						<span className="font-mono">{noFee} USDC</span>
-					</div>
-				</div>
-
-				{/* Calculation Area */}
-				<div className="border-t pt-6 flex flex-col gap-4">
-					{!isEnded && (
-						<>
-							<div
-								className={`rounded-xl border-2 p-4 text-center transition-all duration-300 relative overflow-hidden min-h-[100px] flex flex-col justify-center items-center shadow-inner mb-4
-									${!selectedSide ? "bg-muted/20 border-dashed border-muted-foreground/20 text-muted-foreground" : ""}
-									${selectedSide === 'YES' ? "bg-emerald-50/80 border-emerald-500/30 text-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-100" : ""}
-									${selectedSide === 'NO' ? "bg-rose-50/80 border-rose-500/30 text-rose-900 dark:bg-rose-950/20 dark:text-rose-100" : ""}
-								`}
+						<div className="space-y-1">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Database className="h-4 w-4" /> Oracle Config
+							</div>
+							<p
+								className="font-medium truncate"
+								title={market.oracle_config}
 							>
-								{!selectedSide ? (
-									<div className="flex flex-col items-center gap-1 animate-in fade-in duration-300">
-										<span className="text-sm font-medium">Estimate Cost</span>
-										<span className="text-xs opacity-70">Select YES or NO to calculate</span>
-									</div>
-								) : (
-									<div className="w-full animate-in slide-in-from-bottom-2 fade-in duration-200">
-										<div className="flex items-center justify-center gap-2 mb-1 opacity-70">
-											<span className="text-[10px] uppercase tracking-wider font-bold">
-												Estimated Cost ({selectedSide})
+								{market.oracle_config}
+							</p>
+						</div>
+					</div>
+
+					<div className="bg-muted/30 p-4 rounded-lg border space-y-2">
+						<h4 className="font-semibold text-sm">Fee Structure</h4>
+						<div className="flex justify-between text-sm">
+							<span>Yes Position Fee:</span>
+							<span className="font-mono">{yesFee} USDC</span>
+						</div>
+						<div className="flex justify-between text-sm">
+							<span>No Position Fee:</span>
+							<span className="font-mono">{noFee} USDC</span>
+						</div>
+					</div>
+
+					{/* Calculation Area */}
+					<div className="border-t pt-6 flex flex-col gap-4">
+						{!isEnded && (
+							<>
+								<div
+									className={`rounded-xl border-2 p-4 text-center transition-all duration-300 relative overflow-hidden min-h-[100px] flex flex-col justify-center items-center shadow-inner mb-4
+										${!selectedSide ? "bg-muted/20 border-dashed border-muted-foreground/20 text-muted-foreground" : ""}
+										${selectedSide === "YES" ? "bg-emerald-50/80 border-emerald-500/30 text-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-100" : ""}
+										${selectedSide === "NO" ? "bg-rose-50/80 border-rose-500/30 text-rose-900 dark:bg-rose-950/20 dark:text-rose-100" : ""}
+									`}
+								>
+									{!selectedSide ? (
+										<div className="flex flex-col items-center gap-1 animate-in fade-in duration-300">
+											<span className="text-sm font-medium">
+												Estimate Cost
+											</span>
+											<span className="text-xs opacity-70">
+												Select YES or NO to calculate
 											</span>
 										</div>
-										<div className="text-3xl font-bold tracking-tight leading-none mb-1">
-											{currentTotal}
-											<span className="text-sm font-normal opacity-70 ml-1">USDC</span>
+									) : (
+										<div className="w-full animate-in slide-in-from-bottom-2 fade-in duration-200">
+											<div className="flex items-center justify-center gap-2 mb-1 opacity-70">
+												<span className="text-[10px] uppercase tracking-wider font-bold">
+													Estimated Cost ({selectedSide})
+												</span>
+											</div>
+											<div className="text-3xl font-bold tracking-tight leading-none mb-1">
+												{currentTotal}
+												<span className="text-sm font-normal opacity-70 ml-1">
+													USDC
+												</span>
+											</div>
+											<div className="text-xs opacity-60 font-mono flex justify-center items-center gap-1">
+												<span>{currentFee.toFixed(4)}</span>
+												<span>×</span>
+												<span>{isValidAmount ? parsedAmount : 0}</span>
+											</div>
 										</div>
-										<div className="text-xs opacity-60 font-mono flex justify-center items-center gap-1">
-											<span>{currentFee.toFixed(4)}</span>
-											<span>×</span>
-											<span>{isValidAmount ? parsedAmount : 0}</span>
-										</div>
-									</div>
-								)}
-							</div>
+									)}
+								</div>
 
-							{/* 使用 FlipBuyButton 互動邏輯 */}
-							<div className="flex gap-2 mb-2">
-								<FlipBuyButton
-									side="YES"
-									price={typeof yesFee === 'number' ? yesFee : 0}
-									amount={amount}
-									setAmount={setAmount}
-									selectedSide={selectedSide}
-									setSelectedSide={setSelectedSide}
-									onConfirm={() => {
-										// TODO: 實際下單邏輯
-										setAmount("");
-										setSelectedSide(null);
-									}}
-									className="flex-1 h-12"
-									disabled={isEnded}
-								/>
-								<FlipBuyButton
-									side="NO"
-									price={typeof noFee === 'number' ? noFee : 0}
-									amount={amount}
-									setAmount={setAmount}
-									selectedSide={selectedSide}
-									setSelectedSide={setSelectedSide}
-									onConfirm={() => {
-										// TODO: 實際下單邏輯
-										setAmount("");
-										setSelectedSide(null);
-									}}
-									className="flex-1 h-12"
-									disabled={isEnded}
-								/>
-							</div>
-						</>
-					)}
-					<Button className="mt-4 w-full" onClick={handleResolve} variant="default">
-						Resolve
-					</Button>
+								<div className="flex gap-2 mb-2">
+									<FlipBuyButton
+										side="YES"
+										price={typeof yesFee === "number" ? yesFee : 0}
+										amount={amount}
+										setAmount={setAmount}
+										selectedSide={selectedSide}
+										setSelectedSide={setSelectedSide}
+										onConfirm={() => {
+											// TODO: 實際下單邏輯
+											setAmount("");
+											setSelectedSide(null);
+										}}
+										className="flex-1 h-12"
+										disabled={isEnded}
+									/>
+									<FlipBuyButton
+										side="NO"
+										price={typeof noFee === "number" ? noFee : 0}
+										amount={amount}
+										setAmount={setAmount}
+										selectedSide={selectedSide}
+										setSelectedSide={setSelectedSide}
+										onConfirm={() => {
+											// TODO: 實際下單邏輯
+											setAmount("");
+											setSelectedSide(null);
+										}}
+										className="flex-1 h-12"
+										disabled={isEnded}
+									/>
+								</div>
+							</>
+						)}
+						<Button
+							className="mt-4 w-full"
+							onClick={handleResolve}
+							variant="default"
+						>
+							Resolve
+						</Button>
+					</div>
+				</div>
+
+				{/* 右側：對應這個 market 的聊天室 */}
+				<div className="h-full">
+					<MarketChatRoom marketId={market.address} />
 				</div>
 			</div>
 		</div>
