@@ -38,7 +38,7 @@ function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden">
       <Image
-        src="/Nereus.gif"
+        src="/nereus_compress.gif"
         alt="Nereus Hero Animation"
         fill
         className="object-cover opacity-70"
