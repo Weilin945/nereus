@@ -55,7 +55,7 @@ export default function MarketChatRoom({ marketId }: MarketChatRoomProps) {
 
 	useEffect(() => {
 		fetchMessages();
-		const id = setInterval(fetchMessages, 2000);
+		const id = setInterval(fetchMessages, 30000);
 		return () => clearInterval(id);
 	}, [marketId]);
 

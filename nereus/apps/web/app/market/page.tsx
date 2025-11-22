@@ -9,7 +9,10 @@ import { Button } from "@workspace/ui/components/button";
 import { FlipBuyButton } from "../../components/market/flip-buy-button";
 import { Clock, Database, Wallet } from "lucide-react";
 import MarketChatRoom from "@/components/market/ChatRoom";
-
+import BuyerRankTabs from "@/components/market/buyerRank";
+import { useBuyYes } from "@/hooks/useBuyYes";
+import { useBuyNo } from "@/hooks/useBuyNo";
+import { Navbar } from "@/components/navbar";
 function calculatePercentage(value: number, total: number): number {
 	if (total === 0) return 0;
 	return Math.round((value / total) * 100);
@@ -18,21 +21,27 @@ function calculatePercentage(value: number, total: number): number {
 const formatDate = (ts: number) => new Date(ts).toLocaleString();
 
 export default function MarketPage() {
+	
+	const { handleBuyYes } = useBuyYes()
+	const { handleBuyNo } = useBuyNo()
 	const searchParams = useSearchParams();
 	const marketId = searchParams.get("id");
-	const { marketList } = storeStore();
+	const { marketList, queryMarkets } = storeStore();
+	React.useEffect(() => {
+		queryMarkets();
+	}, [queryMarkets]);
 	const market = marketList.find((m) => m.address === marketId);
-
+	
 	// ✅ hooks 一定要在條件 return 之前宣告
 	const [amount, setAmount] = React.useState("");
 	const [selectedSide, setSelectedSide] = React.useState<"YES" | "NO" | null>(
 		null,
 	);
-
+	
 	if (!market) {
 		return <div className="p-8 text-center">Market not found.</div>;
 	}
-
+	
 	const total = market.yes + market.no;
 	const yesPercentage = calculatePercentage(market.yes, total);
 	const noPercentage = calculatePercentage(market.no, total);
@@ -40,33 +49,34 @@ export default function MarketPage() {
 	const noFee = market.noprice ? Number(market.noprice) / 1e9 : "-";
 	const now = Math.floor(Date.now() / 1000);
 	const isEnded = market.end_time <= now;
-
+	
 	const handleResolve = () => {
 		console.log("Resolve button pressed for market:", marketId);
 	};
-
+	
 	// 計算區塊
 	const currentFee =
-		selectedSide === "YES"
-			? typeof yesFee === "number"
-				? yesFee
-				: 0
-			: selectedSide === "NO"
-				? typeof noFee === "number"
-					? noFee
-					: 0
-				: 0;
+	selectedSide === "YES"
+	? typeof yesFee === "number"
+	? yesFee
+	: 0
+	: selectedSide === "NO"
+	? typeof noFee === "number"
+	? noFee
+	: 0
+	: 0;
 	const parsedAmount = parseFloat(amount);
 	const isValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
 	const currentTotal =
-		currentFee && isValidAmount
-			? (currentFee * parsedAmount).toFixed(4)
-			: "0.0000";
-
+	currentFee && isValidAmount
+	? (currentFee * parsedAmount).toFixed(4)
+	: "0.0000";
+	
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-8">
+			<Navbar />
 			{/* 🔹 左右兩欄：左邊 market、右邊 chat；小螢幕時會上下堆疊 */}
-			<div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] items-start">
+			<div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] items-start">
 				{/* 左側：原本的 market 內容 */}
 				<div className="space-y-6">
 					<div className="flex items-start justify-between">
@@ -163,7 +173,7 @@ export default function MarketPage() {
 										${selectedSide === "YES" ? "bg-emerald-50/80 border-emerald-500/30 text-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-100" : ""}
 										${selectedSide === "NO" ? "bg-rose-50/80 border-rose-500/30 text-rose-900 dark:bg-rose-950/20 dark:text-rose-100" : ""}
 									`}
-								>
+									>
 									{!selectedSide ? (
 										<div className="flex flex-col items-center gap-1 animate-in fade-in duration-300">
 											<span className="text-sm font-medium">
@@ -204,13 +214,13 @@ export default function MarketPage() {
 										selectedSide={selectedSide}
 										setSelectedSide={setSelectedSide}
 										onConfirm={() => {
-											// TODO: 實際下單邏輯
+											handleBuyYes(market, BigInt(amount));
 											setAmount("");
 											setSelectedSide(null);
 										}}
 										className="flex-1 h-12"
 										disabled={isEnded}
-									/>
+										/>
 									<FlipBuyButton
 										side="NO"
 										price={typeof noFee === "number" ? noFee : 0}
@@ -219,13 +229,13 @@ export default function MarketPage() {
 										selectedSide={selectedSide}
 										setSelectedSide={setSelectedSide}
 										onConfirm={() => {
-											// TODO: 實際下單邏輯
+											handleBuyNo(market, BigInt(amount));
 											setAmount("");
 											setSelectedSide(null);
 										}}
 										className="flex-1 h-12"
 										disabled={isEnded}
-									/>
+										/>
 								</div>
 							</>
 						)}
@@ -233,16 +243,19 @@ export default function MarketPage() {
 							className="mt-4 w-full"
 							onClick={handleResolve}
 							variant="default"
-						>
+							>
 							Resolve
 						</Button>
 					</div>
 				</div>
 
 				{/* 右側：對應這個 market 的聊天室 */}
-				<div className="h-full">
+				{market!=undefined &&(<div className="h-full flex flex-col gap-4">
 					<MarketChatRoom marketId={market.address} />
-				</div>
+					<BuyerRankTabs
+						marketAddress={market.address}
+						/>
+				</div>)}
 			</div>
 		</div>
 	);
