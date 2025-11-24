@@ -36,7 +36,7 @@ type StoreState = {
   fetchUser: (userAddress: string) => Promise<void>;
   selectTrade: (market: Market, side: "Yes" | "No") => void;
   fetchRichMan: (marketAddress: string, side: "Yes" | "No") => Promise<any>;
-  queryOracleSettings: (oracleID: string) => Promise<void>;
+  queryOracleSettings: (oracleID: string) => Promise<string | undefined>;
 };
 
 export const storeStore = create<StoreState>((set) => ({
@@ -49,37 +49,17 @@ export const storeStore = create<StoreState>((set) => ({
     const res = await gqlQuery<any>(`
       query {
   object(address:"${oracleID}"){
-        previousTransaction { # 注意這裡通常是 Block
-          digest
-
-        }
         asMoveObject {
           contents {
             json
           }
         }
       }
-}
+    }
     `);
-    let configId = res.data?.object.asMoveObject.contents.json.config_id;
-    const blob_id = await gqlQuery<any>(`
-      query {
-  object(address:"${configId}"){
-        previousTransaction { # 注意這裡通常是 Block
-          digest
-
-        }
-        asMoveObject {
-          contents {
-            json
-          }
-        }
-      }
-}
-    `);
-    console.log(blob_id.data.object.asMoveObject.contents.json.blob_id);
-    return (blob_id.data.object.asMoveObject.contents.json.blob_id);
+    return res.data?.object?.asMoveObject?.contents?.json?.blob_id;
   },
+
   queryMarkets: async () => {
     const res = await gqlQuery<any>(`
       {

@@ -496,7 +496,7 @@ function MarketContent() {
 								<PricePill side="No" price={noPercentage} />
 							</div>
 						</div>
-						<Sparkline width={600} height={200} className="w-full" />
+						<Sparkline width={600} height={300} className="w-full" interactive={true} />
 					</div>
 
 					<OrderBook />

@@ -82,6 +82,9 @@ export const WalrusBlobViewer: React.FC<WalrusBlobViewerProps> = ({
 
       try {
         const [file] = await walrusClient.walrus.getFiles({ ids: [blobId] });
+        if (!file) {
+          throw new Error("File not found");
+        }
         const text = await file.text();
 
         if (cancelled) return;
