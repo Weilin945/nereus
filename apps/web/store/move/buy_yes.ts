@@ -1,4 +1,3 @@
-
 import { Transaction } from "@mysten/sui/transactions";
 import { market as PACKAGE_ID } from "./package";
 
@@ -33,10 +32,7 @@ export function buyYesTx(
 
     const [depositCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(usdcAmount)]);
 
-
-
-
-
+    // --- 2. Deposit USDC ---
     tx.moveCall({
         target: `${PACKAGE_ID}::deposit_usdc`,
         arguments: [
@@ -56,8 +52,8 @@ export function buyYesTx(
     tx.moveCall({
         target: `${PACKAGE_ID}::post_order`,
         arguments: [
-            tx.object(marketId),
-            tx.moveCall({
+            tx.object(marketId), // arg0: Market
+            tx.moveCall({        // arg1: Order
                 target: `${PACKAGE_ID}::create_order`,
                 arguments: [
                     tx.pure.address(userAddress),  // maker
@@ -68,7 +64,8 @@ export function buyYesTx(
                     tx.pure.u64(expiration),       // expiration
                     tx.pure.u64(salt)              // salt
                 ]
-            })
+            }),
+            tx.object('0x6')     // arg2: Clock (新增參數)
         ]
     });
 
