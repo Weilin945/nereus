@@ -1,7 +1,6 @@
 import { Transaction } from "@mysten/sui/transactions";
 import { market as PACKAGE_ID } from "./package";
 
-const MODULE_NAME = "market";
 const PRICE_SCALE = 1_000_000_000n;
 const ASSET_NO = 0;
 const SIDE_BUY = 0; 
@@ -47,8 +46,8 @@ export function buyNoTx(
     tx.moveCall({
         target: `${PACKAGE_ID}::post_order`,
         arguments: [
-            tx.object(marketId),
-            tx.moveCall({
+            tx.object(marketId), // arg0: Market
+            tx.moveCall({        // arg1: Order
                 target: `${PACKAGE_ID}::create_order`,
                 arguments: [
                     tx.pure.address(userAddress),
@@ -59,7 +58,8 @@ export function buyNoTx(
                     tx.pure.u64(expiration),
                     tx.pure.u64(salt)
                 ]
-            })
+            }),
+            tx.object('0x6')     // arg2: Clock (新增參數)
         ]
     });
 
