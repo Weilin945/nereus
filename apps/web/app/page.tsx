@@ -157,8 +157,8 @@ function FeatureStrip() {
       icon: Brain,
     },
     {
-      title: "Immutable Resolution",
-      description: "Via Nautilus, the Market resolves in Trustable, Immutable Code and Large Language Model.",
+      title: "Instant Resolution",
+      description: "Via Nautilus, the Market immediately resolves in Trustable, Immutable Code and Large Language Model.",
       icon: Code2,
     },
   ];
