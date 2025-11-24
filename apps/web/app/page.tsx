@@ -10,6 +10,7 @@ import {
   Search,
   Anchor
 } from "lucide-react";
+import Link from 'next/link';
 
 // --- Mock UI Components for the single-file demo ---
 type ButtonVariant = 'default' | 'outline' | 'ghost';
@@ -100,9 +101,9 @@ function HeroSection() {
               </a>
             ))}
             <Button size="sm" className="bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
-              <a href="/main" className="text-white flex items-center gap-2">
+              <Link href="/main" target="_blank" rel="noopener noreferrer">
                 Launch App <ArrowUpRight className="h-3 w-3" />
-              </a>
+              </Link>
             </Button>
           </nav>
         </header>
@@ -119,13 +120,13 @@ function HeroSection() {
             </h1>
 
             <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-400 md:text-base">
-              Empower Your Visionary, Light Up the Pools of Possibility with the power of 
+              Empower Your Visionary, Light Up the Pools of Possibility with the power of
             </p>
             <p className='text-3xl italic text-white'>Nereus</p>
 
             <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
               <Button className="group h-12 min-w-[160px] rounded-sm bg-amber-500 px-8 text-slate-950 shadow-[0_0_40px_rgba(245,158,11,0.4)] transition-all hover:bg-amber-400 hover:shadow-[0_0_60px_rgba(245,158,11,0.6)]">
-                <span className="font-semibold tracking-wide"><a href="/main">Enter App</a></span>
+                <span className="font-semibold tracking-wide"><Link href="/main">Enter App</Link></span>
               </Button>
               <Button variant="outline" className="h-12 min-w-[160px] rounded-sm border-slate-800 bg-slate-950/50 text-slate-400 backdrop-blur hover:border-amber-500/30 hover:text-amber-200">
                 Read the Whitepaper
