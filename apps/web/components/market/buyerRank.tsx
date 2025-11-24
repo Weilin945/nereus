@@ -17,6 +17,7 @@ type Buyer = {
 
 interface BuyerRankProps {
 	marketAddress: string;
+	mock?: boolean;
 }
 
 // --- 輔助函式 ---
@@ -89,16 +90,55 @@ function BuyerList({ buyers, isLoading, side }: { buyers: Buyer[], isLoading: bo
 }
 
 // --- 主元件 ---
-export default function BuyerRankTabs({ marketAddress }: BuyerRankProps) {
+export default function BuyerRankTabs({ marketAddress, mock }: BuyerRankProps) {
 	const [yesBuyers, setYesBuyers] = useState<Buyer[]>([]);
 	const [noBuyers, setNoBuyers] = useState<Buyer[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		console.log("Fetching buyer rankings for market:", marketAddress);
+		if (!marketAddress) return;
+		if (typeof window === "undefined") return;
+		// If mock prop is true, use mock data
+		if ((window as any).USE_BUYER_RANK_MOCK || (typeof mock !== "undefined" && mock)) {
+			setLoading(false);
+			setYesBuyers([
+				{
+					address: "0x1234567890abcdef1234",
+					buyAmount: 1234567890,
+					lastBuyTime: new Date().toISOString(),
+					transactionCount: 5,
+				},
+				{
+					address: "0xabcdefabcdefabcdabcd",
+					buyAmount: 987654321,
+					lastBuyTime: new Date(Date.now() - 3600 * 1000).toISOString(),
+					transactionCount: 3,
+				},
+				{
+					address: "0xdeadbeefdeadbeefdead",
+					buyAmount: 555555555,
+					lastBuyTime: new Date(Date.now() - 7200 * 1000).toISOString(),
+					transactionCount: 2,
+				},
+			]);
+			setNoBuyers([
+				{
+					address: "0xfeedfeedfeedfeedfeed",
+					buyAmount: 222222222,
+					lastBuyTime: new Date(Date.now() - 1800 * 1000).toISOString(),
+					transactionCount: 1,
+				},
+				{
+					address: "0xcafebabecafebabe1234",
+					buyAmount: 333333333,
+					lastBuyTime: new Date(Date.now() - 5400 * 1000).toISOString(),
+					transactionCount: 4,
+				},
+			]);
+			return;
+		}
+		setLoading(true);
 		const loadData = async () => {
-			if (!marketAddress) return;
-			setLoading(true);
 			try {
 				const [yesData, noData] = await Promise.all([
 					storeStore.getState().fetchRichMan(marketAddress, "Yes"),
@@ -113,7 +153,7 @@ export default function BuyerRankTabs({ marketAddress }: BuyerRankProps) {
 			}
 		};
 		loadData();
-	}, [marketAddress]);
+	}, [marketAddress, mock]);
 
 	return (
 		<Card className="w-full max-w-md mx-auto shadow-sm">

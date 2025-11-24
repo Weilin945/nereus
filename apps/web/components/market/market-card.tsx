@@ -234,61 +234,73 @@ export function MarketCardGrid({ m, onMarketClick }: MarketCardProps) {
   const noFee = m.noprice ? Number(m.noprice) / 1e9 : undefined
 
   return (
-    <Card className="cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full">
-      <CardHeader className="pb-2">
+    <Card className="cursor-pointer hover:shadow-md transition-all duration-200 flex flex-col h-full border-muted-foreground/20">
+      {/* 1. Header: 給予固定最小高度，保證對齊 */}
+      <CardHeader className="pb-2 px-4 pt-4">
         <CardTitle
-          className="line-clamp-2 text-base break-words hyphens-auto leading-snug"
+          className="line-clamp-2 text-base break-words hyphens-auto leading-snug min-h-[3rem]" 
           onClick={() => onMarketClick?.(m)}
         >
           {m.topic}
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-3 flex-1 flex flex-col">
-        <div className="w-full overflow-hidden">
-          <Sparkline width={300} height={70} className="w-full h-auto" />
+      <CardContent className="px-4 pb-4 flex-1 flex flex-col">
+        {/* 2. Chart: 使用 flex-1 佔據剩餘空間，並居中放置 */}
+        <div className="flex-1 flex items-center justify-center w-full min-h-[80px] py-2 overflow-hidden">
+          <Sparkline width={300} height={70} className="w-full h-auto opacity-80" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mt-auto">
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-center">
-              <PricePill side="Yes" price={yesPercentage} />
+        {/* 3. Actions: 操作區塊 */}
+        <div className="mt-auto space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            {/* YES Side */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-center">
+                <PricePill side="Yes" price={yesPercentage} />
+              </div>
+              {!isEnded && (
+                <FlipBuyButton
+                  side="YES"
+                  price={yesFee ?? 0}
+                  onConfirm={(amount) => handleBuyYes(m, amount)}
+                  className="w-full text-xs h-9 font-semibold"
+                />
+              )}
             </div>
-            {!isEnded && (
-              <FlipBuyButton
-                side="YES"
-                price={yesFee ?? 0}
-                onConfirm={(amount) => handleBuyYes(m, amount)}
-                className="w-full text-xs h-9"
-              />
-            )}
+
+            {/* NO Side */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-center">
+                <PricePill side="No" price={noPercentage} />
+              </div>
+              {!isEnded && (
+                <FlipBuyButton
+                  side="NO"
+                  price={noFee ?? 0}
+                  onConfirm={(amount) => handleBuyNo(m, amount)}
+                  className="w-full text-xs h-9 font-semibold"
+                />
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-center">
-              <PricePill side="No" price={noPercentage} />
-            </div>
-            {!isEnded && (
-              <FlipBuyButton
-                side="NO"
-                price={noFee ?? 0}
-                onConfirm={(amount) => handleBuyNo(m, amount)}
-                className="w-full text-xs h-9"
-              />
-            )}
+          {/* 4. Footer Stats: 使用 border-t 區隔，增加 padding */}
+          <div className="flex justify-between items-center pt-3 border-t text-xs text-muted-foreground">
+            <Stat label="Ends" value={countdown} />
+            <Stat 
+              label="Fee" 
+              value={`Y:${yesFee?.toFixed(2) ?? "-"} / N:${noFee?.toFixed(2) ?? "-"}`} 
+            />
           </div>
-        </div>
 
-        <div className="flex justify-between items-center pt-2 border-t text-xs">
-          <Stat label="Ends" value={countdown} />
-          <Stat label="Fee" value={`Y:${yesFee?.toFixed(2) ?? "-"} N:${noFee?.toFixed(2) ?? "-"}`} />
+          {/* View Details Button (Optional: 如果卡片本身可點，這個可以考慮移除或做小一點) */}
+          <Link href={`/market?id=${m.address}`} className="block">
+            <Button variant="outline" className="w-full h-8 text-xs" size="sm">
+              View Details
+            </Button>
+          </Link>
         </div>
-
-        <Link href={`/market?id=${m.address}`}>
-          <Button variant="outline" className="w-full" size="sm">
-            View Details
-          </Button>
-        </Link>
       </CardContent>
     </Card>
   )

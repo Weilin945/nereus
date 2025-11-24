@@ -215,7 +215,7 @@ export const storeStore = create<StoreState>((set) => ({
         }
       }
     `);
-
+      console.log("fetchRichMan raw data:", res.data);
     // 2. 過濾出屬於目前 Market 的物件
     const rawNodes = res.data.objects.edges
       .map((edge: any) => edge.node)

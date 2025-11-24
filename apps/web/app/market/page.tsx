@@ -710,7 +710,7 @@ function MarketContent() {
 				{market != undefined && (
 					<div className="h-full flex flex-col gap-4">
 						<MarketChatRoom marketId={market.address} />
-						<BuyerRankTabs marketAddress={market.address} />
+						<BuyerRankTabs marketAddress={market.address} mock />
 					</div>
 				)}
 			</div>
